@@ -1,2 +1,2 @@
-# esrijs
-My first Esri JS Map
+# GIS Mideterm
+GIS Midterm based on esri.js
