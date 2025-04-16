@@ -1,55 +1,118 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Hello, Map!</title>
+  <title>Community GreenMap</title>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="description" content="" />
+  <meta name="description" content="Collaborative map of green spaces" />
 
-  <!-- calls for the arcgis api's CSS file and JS library. -->
+  <!-- ArcGIS API -->
   <link rel="stylesheet" href="https://js.arcgis.com/4.25/esri/themes/light/main.css">
   <script src="https://js.arcgis.com/4.25/"></script>
 
-  <!-- Adding the modules, API key, and map constant needed for a full screen map app -->
-  <script>
-  
-    require([
-     "esri/config",
-      "esri/Map",
-      "esri/views/MapView"
-    ], function (esriConfig,Map, MapView) {
-
-      esriConfig.apiKey = "AAPK2cb19acc98eb406b80346e85af5aa1ffagWp07_WJVQlFAY2XL6xGrQ86USz9K6UzB1OaBd37PTIlYdHTo04S0-F9ETbr-dC";
-      const map = new Map({
-        basemap: "arcgis-topographic" // Basemap layer
-      });
-
-      const view = new MapView({
-          map: map,
-          center: [-97.7431, 30.2672], // Longitude, latitude
-          zoom: 13, // Zoom level
-          container: "viewDiv" // Div element
-        });
-    });
-  </script>
-
-  <!-- css to make a full screen map -->
   <style>
-    html,
-    body,
-    #viewDiv {
-      padding: 0;
+    html, body, #viewDiv {
       margin: 0;
+      padding: 0;
       height: 100%;
       width: 100%;
+      font-family: sans-serif;
+    }
+
+    #addBtn {
+      position: absolute;
+      bottom: 30px;
+      right: 30px;
+      z-index: 99;
+      background-color: #2e7d32;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 56px;
+      height: 56px;
+      font-size: 28px;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    }
+
+    #addBtn:hover {
+      background-color: #1b5e20;
     }
   </style>
 
+  <script>
+    require([
+      "esri/config",
+      "esri/Map",
+      "esri/views/MapView",
+      "esri/layers/FeatureLayer",
+      "esri/widgets/Editor"
+    ], function(esriConfig, Map, MapView, FeatureLayer, Editor) {
+
+      // Set your ArcGIS API key
+      esriConfig.apiKey = "AAPK2cb19acc98eb406b80346e85af5aa1ffagWp07_WJVQlFAY2XL6xGrQ86USz9K6UzB1OaBd37PTIlYdHTo04S0-F9ETbr-dC";
+
+      // Create the map with a topographic basemap
+      const map = new Map({
+        basemap: "arcgis-topographic"
+      });
+
+      // Create the MapView
+      const view = new MapView({
+        container: "viewDiv",
+        map: map,
+        center: [-97.7431, 30.2672], // Austin, TX
+        zoom: 12
+      });
+
+      const ndviLayer = new ImageryLayer({
+  url: "https://sampleserver6.arcgisonline.com/arcgis/rest/services/NDVI/ImageServer",
+  title: "NDVI - Vegetation Index",
+  renderingRule: {
+    rasterFunction: "NDVI", // Apply the NDVI raster function
+    rasterFunctionArguments: {
+      Red: 3, // Band index for Red
+      NIR: 4  // Band index for Near Infrared
+    }
+  },
+  popupTemplate: {
+    title: "NDVI Value",
+    content: "NDVI: {Raster.NDVI}"
+  }
+});
+
+map.add(ndviLayer);
+
+      // Add the Editor widget to allow adding/editing features
+      view.when(() => {
+        const editor = new Editor({
+          view: view,
+          layerInfos: [{
+            layer: greenSpacesLayer,
+            enabled: true
+          }]
+        });
+        view.ui.add(editor, "top-right");
+      });
+
+      // Optional: Button to trigger adding a new feature
+      document.getElementById("addBtn").addEventListener("click", () => {
+        view.popup.close();
+        view.whenLayerView(greenSpacesLayer).then(() => {
+          const editFeature = {
+            layer: greenSpacesLayer
+          };
+          view.ui.find("editor").viewModel.startCreateFeatureWorkflow(editFeature);
+        });
+      });
+    });
+  </script>
 </head>
 <body>
-
-  <!-- the div to displays the map  -->
+  <!-- Map Div -->
   <div id="viewDiv"></div>
 
+  <!-- Floating Add Button -->
+  <button id="addBtn">+</button>
 </body>
 </html>
