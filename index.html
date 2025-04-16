@@ -84,6 +84,23 @@
 
 map.add(ndviLayer);
 
+
+
+const ParksLayer = new FeatureLayer({
+url: "https://citymaps.capetown.gov.za/agsext1/rest/services/Theme_Based/Open_Data_Service/FeatureServer/29", //get URL from AGOL Item Page
+title: "Parks",
+  outFields: ["OBJECTID", "PARK_NAME", "LU_PARK_TYPE"],
+  popupTemplate: {
+    title: "{PARK_NAME}",
+    content: `
+      <b>OBJECTID:</b> {OBJECTID}<br>
+      <b>Park Name:</b> {PARK_NAME}<br>
+      <b>Park Type:</b> {LU_PARK_TYPE}
+    `
+  }
+});
+map.add(ParksLayer);
+
       // Add the Editor widget to allow adding/editing features
       view.when(() => {
         const editor = new Editor({
