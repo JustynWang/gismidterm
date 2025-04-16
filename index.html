@@ -66,24 +66,19 @@
         zoom: 12
       });
 
-      const ndviLayer = new ImageryLayer({
-  url: "https://sampleserver6.arcgisonline.com/arcgis/rest/services/NDVI/ImageServer",
+      const ndviLayer = new FeatureLayer({
+  url: "https://naip.arcgis.com/arcgis/rest/services/NAIP/ImageServer",
   title: "NDVI - Vegetation Index",
-  renderingRule: {
-    rasterFunction: "NDVI", // Apply the NDVI raster function
-    rasterFunctionArguments: {
-      Red: 3, // Band index for Red
-      NIR: 4  // Band index for Near Infrared
-    }
-  },
+  outFields: ["*"],
   popupTemplate: {
-    title: "NDVI Value",
-    content: "NDVI: {Raster.NDVI}"
+    title: "NDVI Feature",
+    content: `
+      <b>NDVI Value:</b> {NDVI_FIELD}
+    `
   }
 });
 
 map.add(ndviLayer);
-
 
 
 const ParksLayer = new FeatureLayer({
@@ -106,7 +101,7 @@ map.add(ParksLayer);
         const editor = new Editor({
           view: view,
           layerInfos: [{
-            layer: greenSpacesLayer,
+            layer: ParksLayer,
             enabled: true
           }]
         });
